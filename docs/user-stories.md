@@ -31,7 +31,7 @@ As a Coordinator, I want to see who signed up for an event so I can manage atten
 
 ## 5.3 Volunteer User Stories
 
-**US-C1**
+**US-V1**
 As a Volunteer, I want to register to the app.
 
 **US-V1**
