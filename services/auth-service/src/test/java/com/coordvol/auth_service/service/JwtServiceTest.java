@@ -3,13 +3,13 @@ package com.coordvol.auth_service.service;
 import java.util.Date;
 import java.util.UUID;
 
-import io.jsonwebtoken.Claims;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import com.coordvol.auth_service.domain.enums.Role;
+import com.coordvol.auth_service.service.impl.JwtServiceImpl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class JwtServiceTest {
 
     private JwtService jwtService;
-    private final String secret = "mySecretKeyForJWTTokenGenerationMustBeLongEnoughForHS512Algorithm"; // 256-bit key
+    private final String secret = "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF";
     private final long expiration = 3600000L; // 1 hour
     private final String issuer = "auth-service-test"; // 24 hours
 
@@ -56,10 +56,10 @@ public class JwtServiceTest {
             
             // Act
             String token = jwtService.generateToken(userId, role);
-            Claims claims = jwtService.extractClaims(token);
+            UUID resultId = jwtService.extractUserId(token);
             
             // Assert
-            assertThat(claims.getSubject()).isEqualTo(userId.toString());
+            assertThat(resultId).isEqualTo(userId);
         }
 
         @Test
@@ -71,10 +71,10 @@ public class JwtServiceTest {
             
             // Act
             String token = jwtService.generateToken(userId, role);
-            Claims claims = jwtService.extractClaims(token);
+            Role resultRole = jwtService.extractRole(token);
             
             // Assert
-            assertThat(claims.get("role", String.class)).isEqualTo("ADMIN");
+            assertThat(resultRole).isEqualTo(role);
         }
 
         @Test
@@ -85,10 +85,10 @@ public class JwtServiceTest {
             
             // Act
             String token = jwtService.generateToken(userId, Role.VOLUNTEER);
-            Claims claims = jwtService.extractClaims(token);
+            String resultIssuer = jwtService.extractIssuer(token);
             
             // Assert
-            assertThat(claims.getIssuer()).isEqualTo(issuer);
+            assertThat(resultIssuer).isEqualTo(issuer);
         }
         
         @Test
@@ -100,13 +100,12 @@ public class JwtServiceTest {
             
             // Act
             String token = jwtService.generateToken(userId, Role.COORDINATOR);
-            Claims claims = jwtService.extractClaims(token);
+            Date resultExpiration = jwtService.extractExpiration(token);
             long afterGeneration = System.currentTimeMillis();
             
             // Assert
-            Date expirationDate = claims.getExpiration();
             long expectedExpiration = beforeGeneration + expiration;
-            assertThat(expirationDate.getTime()).isBetween(
+            assertThat(resultExpiration.getTime()).isBetween(
                     expectedExpiration - 1000, // Allow 1 second tolerance
                     afterGeneration + expiration + 1000
             );
@@ -162,7 +161,7 @@ public class JwtServiceTest {
         @DisplayName("Should reject expired token")
         void shouldRejectExpiredToken() {
             // Arrange - Create service with very short expiration
-            JwtService shortLivedJwtService = new JwtService(secret, 1L, issuer); // 1ms expiration
+            JwtService shortLivedJwtService = new JwtServiceImpl(secret, 1L, issuer); // 1ms expiration
             UUID userId = UUID.randomUUID();
             String token = shortLivedJwtService.generateToken(userId, Role.VOLUNTEER);
             
