@@ -1,13 +1,17 @@
 package com.coordvol.auth_service.service;
 
 import java.util.Date;
+import java.util.UUID;
+
+import com.coordvol.auth_service.domain.enums.Role;
 
 public interface JwtService {
-    String generateToken(String username, String role);
+    String generateToken(UUID userId, Role role);
     String generateRefreshToken(String username);
-    String extractUsername(String token);
-    String extractRole(String token);
+    UUID extractUserId(String token);
+    Role extractRole(String token);
     Date extractExpiration(String token);
+    String extractIssuer(String token);
     Boolean isTokenExpired(String token);
-    Boolean validateToken(String token, String username);
+    Boolean validateToken(String token);
 }
