@@ -1,7 +1,5 @@
 package com.coordvol.auth_service.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.Date;
 import java.util.UUID;
 
@@ -12,6 +10,8 @@ import org.junit.jupiter.api.Test;
 
 import com.coordvol.auth_service.domain.enums.Role;
 import com.coordvol.auth_service.service.impl.JwtServiceImpl;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for JwtService.
